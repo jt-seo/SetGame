@@ -26,10 +26,10 @@ struct Cardify: ViewModifier {
                             RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 5).foregroundColor(.red)
                         }
                         else if (isSelect) {
-                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 2).foregroundColor(.blue)
+                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 3).foregroundColor(.blue)
                         }
                         else {
-                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 2)
+                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 1)
                         }
                     }.transition(AnyTransition.opacity.animation(Animation.easeOut(duration: 0.5)))
                     content

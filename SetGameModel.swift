@@ -25,7 +25,7 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
         var number: Number
         var shading: Shading
 
-        var isSelected = false
+        var isSelected: Bool = false
         var isMatched: Bool?    // true: matched, false: not-matched.
     }
     
@@ -39,44 +39,52 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
                 break
             }
         }
+        checkCardMatched(selected: Int.max)
     }
     
-    var numOfSelectedCards: Int {
-        get {
-            dealtCards.filter{ $0.isSelected }.count
-        }
-        set {
-//            print("numSelect: \(numOfSelectedCards), array: \(dealtCards.filter { $0.isSelected }.count)")
-            if numOfSelectedCards == 3 {  // Check if selected cards conform to a set.
-                let selectedCards = dealtCards.filter { $0.isSelected }
-                if selectedCards.count == 3 {
-                    let isMatched = isSetMatching(selectedCards[0], selectedCards[1], selectedCards[2])
-                    print("Card \(isMatched ? "Matched!" : "Nonmatch!")")
-                    for card in selectedCards {
-                        if let index = dealtCards.firstIndex(of: card) {
-                            dealtCards[index].isMatched = isMatched
-                        }
+    var threeCardSelected = false
+    var numOfSelectedCards = 0
+    
+    private mutating func checkCardMatched(selected: Int) {
+        if !threeCardSelected {  // Check if selected cards conform to a set.
+            let selectedCards = dealtCards.filter { $0.isSelected }
+            if selectedCards.count == 3 {
+                let isMatched = isSetMatching(selectedCards[0], selectedCards[1], selectedCards[2])
+                print("Card \(isMatched ? "Matched!" : "Nonmatch!")")
+                for card in selectedCards {
+                    if let index = dealtCards.firstIndex(of: card) {
+                        dealtCards[index].isMatched = isMatched
                     }
                 }
-                else {
-                    print("Invalid selected card count! \(selectedCards.count)")
-                }
+                threeCardSelected = true
             }
-            else if newValue > 3 {
-                let numOfMatchingCards = dealtCards.filter { $0.isMatched == true }.count
-                if (numOfMatchingCards > 0) {
-                    dealtCards.removeAll { $0.isMatched == true }
-                    dealCards(for: 3)
-                }
-                else {
-                    for index in dealtCards.indices {
-                        if (dealtCards[index].isMatched == false) {
-                            dealtCards[index].isMatched = nil
+        }
+        else {
+            let numOfMatchingCards = dealtCards.filter { $0.isMatched == true }.count
+            if (numOfMatchingCards > 0) {
+                removeMatchingCards()
+            }
+            else {
+                print("reset non-matching cards.")
+                for index in dealtCards.indices {
+                    if (dealtCards[index].isMatched == false) {
+                        dealtCards[index].isMatched = nil
+                        if (index != selected) {
                             dealtCards[index].isSelected = false
                         }
                     }
                 }
             }
+            threeCardSelected = false
+        }
+    }
+    
+    private mutating func removeMatchingCards() {
+        print("removeMatchingCards.")
+        dealtCards.removeAll { $0.isMatched == true }
+        let count = 12 - dealtCards.count
+        if (count > 0) {
+            dealCards(for: count)
         }
     }
     
@@ -94,19 +102,15 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
                 && isSetMatching(card1.shading, card2.shading, card3.shading)
     }
     
-    private func checkCardMatching() {
-        
-    }
-    
     // Select a card from the dealt cards
     mutating func selectCard(card: Card) {
         if let index = dealtCards.firstIndex(of: card) {
-            if (!dealtCards[index].isSelected || dealtCards[index].isMatched == true) {
+            if dealtCards[index].isMatched != nil || !dealtCards[index].isSelected {
                 dealtCards[index].isSelected = true
-                numOfSelectedCards += 1
+                checkCardMatched(selected: index)
             }
-            else if (numOfSelectedCards < 3) {  // Deselect this card.
-                dealtCards[index].isSelected = false
+            else {
+                dealtCards[index].isSelected.toggle()
             }
         }
     }

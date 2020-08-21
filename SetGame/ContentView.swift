@@ -15,22 +15,22 @@ struct ContentView: View {
             Grid(setGame.dealtCards) { card in
                 CardView(card: card)
                     .onTapGesture {
-                        withAnimation(.linear(duration: 2)) {
+                        withAnimation(.linear(duration: 0.5)) {
                             self.setGame.selectCard(card: card)
                         }
                 }
-                    .foregroundColor(.gray)
+                    .foregroundColor(.orange)
                     .transition(.offset(x: CGFloat.random(in: -500...500), y: CGFloat.random(in: -500...500)))
                     .padding(5)
             }
             HStack {
                 Button("Start Game") {
-                    withAnimation(.easeOut(duration: 1)) {
+                    withAnimation(.easeOut(duration: 0.5)) {
                         self.setGame.initialDealCards()
                     }
                 }.padding()
                 Button("Deal more") {
-                    withAnimation(.easeOut(duration: 1)) {
+                    withAnimation(.easeOut(duration: 0.5)) {
                         self.setGame.dealMoreCards()
                     }
                 }.padding()
@@ -64,7 +64,7 @@ struct CardView: View {
             }
         }.cardify(isFaceUp: isFlipped, isSelect: card.isSelected, isMatch: card.isMatched)
             .onAppear {
-                withAnimation(.easeOut(duration: 1)) {
+                withAnimation(.easeOut(duration: 0.5)) {
                     self.isFlipped = true
             }
         }
@@ -79,8 +79,9 @@ struct CardView: View {
     }
     
     private func calcContentSize(for size: CGSize) -> CGSize {
-        let width = Int(min(size.width, size.height) / 3 * 0.65)
-        return CGSize(width: CGFloat(width), height: CGFloat(width))
+        let width = size.width / 3 * 0.65
+        let height = size.height * 0.65
+        return CGSize(width: CGFloat(width), height: CGFloat(height))
     }
     
     struct AnyShape: Shape {
@@ -108,7 +109,7 @@ struct CardView: View {
             content = AnyShape(Rectangle())
         }
         else {
-            content = AnyShape(Capsule())
+            content = AnyShape(Ellipse())
         }
         if (card.shading == SetGameVM.Shading.outlined) {
             content = AnyShape(content.stroke())
