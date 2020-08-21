@@ -8,34 +8,64 @@
 
 import Foundation
 
-struct SetGameVM {
+class SetGameVM: ObservableObject {
+    @Published private var setGame = createGame()
+
     enum Color: Equatable, CaseIterable {
-        case red, yellow, blue
+        case red, green, blue
+        var name: String {
+            switch self {
+                case .red: return "red"
+                case .green: return "green"
+                case .blue: return "blue"
+            }
+        }
     }
     enum Symbol: Equatable, CaseIterable {
         case rectangle, diamond, circle
+        var name: String {
+            switch self {
+                case .rectangle: return "rectangle"
+                case .diamond: return "diamond"
+                case .circle: return "circle"
+            }
+        }
     }
-    enum Number: Equatable, CaseIterable {
-        case one, two, three
+    enum Number: Int, Equatable, CaseIterable {
+        case one = 1, two, three
     }
     enum Shading: Equatable, CaseIterable {
         case solid, stripped, outlined
+        var name: String {
+            switch self {
+                case .solid: return "solid"
+                case .stripped: return "stripped"
+                case .outlined: return "outlined"
+            }
+        }
     }
     
     // MARK - Access to Model.
     typealias SetGameType = SetGameModel<Color, Symbol, Number, Shading>
-    private var setGame = SetGameVM.createGame()
+    typealias Card = SetGameType.Card
+
+    var dealtCards: [Card] {
+        setGame.dealtCards
+    }
+    var cardDeck: [Card] {
+        setGame.deck
+    }
     
     private static let numberOfInitialDealtCards = 12
-    private static func createGame() -> SetGameType {
-        var model = SetGameType() {
-            var deck = [SetGameType.Card]()
+    static func createGame() -> SetGameType {
+        return SetGameType() {
+            var deck = [Card]()
             var id = 0
             for color in Color.allCases {
                 for symbol in Symbol.allCases {
                     for number in Number.allCases {
                         for shading in Shading.allCases {
-                            deck.append(SetGameType.Card(
+                            deck.append(Card(
                                 id: id, color: color, symbol: symbol, number: number, shading: shading)
                             )
                             id += 1
@@ -45,11 +75,18 @@ struct SetGameVM {
             }
             return deck
         }
-        model.dealCards(for: SetGameVM.numberOfInitialDealtCards)
-        return model
     }
     
-    mutating func selectCard(card: SetGameType.Card) { // TODO: - Why this selectCard must be mutating?
+    func initialDealCards() {
+        setGame.dealCards(for: SetGameVM.numberOfInitialDealtCards)
+    }
+    
+    func dealMoreCards() {
+        setGame.dealCards(for: 3)
+    }
+    
+    func selectCard(card: Card) {
+        print("Select Card[\(card.id): (\(card.isSelected))\(card.color.name), \(card.symbol.name), \(card.number.rawValue), \(card.shading.name)")
         setGame.selectCard(card: card)
     }
 }

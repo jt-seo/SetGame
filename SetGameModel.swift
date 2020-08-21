@@ -24,7 +24,7 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
         var symbol: Symbol
         var number: Number
         var shading: Shading
-        
+
         var isSelected = false
         var isMatched: Bool?    // true: matched, false: not-matched.
     }
@@ -46,10 +46,12 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
             dealtCards.filter{ $0.isSelected }.count
         }
         set {
-            if newValue == 3 {  // Check if selected cards conform to a set.
+//            print("numSelect: \(numOfSelectedCards), array: \(dealtCards.filter { $0.isSelected }.count)")
+            if numOfSelectedCards == 3 {  // Check if selected cards conform to a set.
                 let selectedCards = dealtCards.filter { $0.isSelected }
                 if selectedCards.count == 3 {
                     let isMatched = isSetMatching(selectedCards[0], selectedCards[1], selectedCards[2])
+                    print("Card \(isMatched ? "Matched!" : "Nonmatch!")")
                     for card in selectedCards {
                         if let index = dealtCards.firstIndex(of: card) {
                             dealtCards[index].isMatched = isMatched
@@ -108,7 +110,4 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
             }
         }
     }
-    
-    
-    
 }
