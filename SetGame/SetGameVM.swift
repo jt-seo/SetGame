@@ -55,10 +55,13 @@ class SetGameVM: ObservableObject {
     var cardDeck: [Card] {
         setGame.deck
     }
+    var numOfCardsInDeck: Int {
+        cardDeck.count
+    }
     
     private static let numberOfInitialDealtCards = 12
     static func createGame() -> SetGameType {
-        return SetGameType() {
+        var model = SetGameType() {
             var deck = [Card]()
             var id = 0
             for color in Color.allCases {
@@ -75,6 +78,8 @@ class SetGameVM: ObservableObject {
             }
             return deck
         }
+        model.dealCards(for: numberOfInitialDealtCards)
+        return model
     }
     
     func initialDealCards() {
@@ -88,5 +93,13 @@ class SetGameVM: ObservableObject {
     func selectCard(card: Card) {
         print("Select Card[\(card.id): (\(card.isSelected))\(card.color.name), \(card.symbol.name), \(card.number.rawValue), \(card.shading.name)")
         setGame.selectCard(card: card)
+    }
+    
+    func resetGame() {
+        setGame = SetGameVM.createGame()
+    }
+    
+    func selectMatchingCard() {
+        setGame.selectMatchingCard()
     }
 }

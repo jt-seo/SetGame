@@ -12,26 +12,34 @@ struct ContentView: View {
     @ObservedObject var setGame: SetGameVM
     var body: some View {
         VStack {
-            Grid(setGame.dealtCards) { card in
-                CardView(card: card)
-                    .onTapGesture {
-                        withAnimation(.linear(duration: 0.5)) {
-                            self.setGame.selectCard(card: card)
-                        }
+            Text("Card in deck: \(setGame.numOfCardsInDeck)").padding()
+            ZStack {
+                Grid(setGame.dealtCards) { card in
+                    CardView(card: card)
+                        .onTapGesture {
+                            withAnimation(.linear(duration: 0.5)) {
+                                self.setGame.selectCard(card: card)
+                            }
+                    }
+                    .foregroundColor(.gray).shadow(radius: 3)
+                        .transition(.offset(x: CGFloat.random(in: -500...500), y: CGFloat.random(in: -500...500)))
+                        .padding(5)
                 }
-                    .foregroundColor(.orange)
-                    .transition(.offset(x: CGFloat.random(in: -500...500), y: CGFloat.random(in: -500...500)))
-                    .padding(5)
             }
             HStack {
-                Button("Start Game") {
-                    withAnimation(.easeOut(duration: 0.5)) {
-                        self.setGame.initialDealCards()
-                    }
-                }.padding()
                 Button("Deal more") {
                     withAnimation(.easeOut(duration: 0.5)) {
                         self.setGame.dealMoreCards()
+                    }
+                }.padding()
+                Button("Help..") {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        self.setGame.selectMatchingCard()
+                    }
+                }.padding()
+                Button("New Game") {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        self.setGame.resetGame()
                     }
                 }.padding()
             }
@@ -48,6 +56,8 @@ struct ContentView_Previews: PreviewProvider {
 struct CardView: View {
     private(set) var card: SetGameVM.Card
     @State var isFlipped = false
+    @State var isMatched = true
+    @State private var timer: Timer?
 
     var body: some View {
         GeometryReader { geometry in
@@ -57,15 +67,47 @@ struct CardView: View {
     
     private func body(card: SetGameVM.Card, size: CGSize) -> some View {
         let contentSize = calcContentSize(for: size)
-        return HStack {
-                ForEach(0..<card.number.rawValue) {_ in
-                    self.cardContent(card: card, for: size)
-                        .frame(width: contentSize.width, height: contentSize.height, alignment: .center)
+        return ZStack {
+            HStack {
+                    ForEach(0..<card.number.rawValue) { _ in
+                        self.cardContent(card: card, for: size)
+                            .frame(width: contentSize.width, height: contentSize.height, alignment: .center)
+                }
+            }.cardify(isFaceUp: isFlipped, isSelect: card.isSelected, isMatch: card.isMatched)
+                .onAppear {
+                    withAnimation(.easeOut(duration: 0.5)) {
+                        self.isFlipped = true
+                    }
+                }
+            
+            if (card.isMatched == true && isMatched) {
+                Text("Nice!")
+                    .font(.headline).foregroundColor(.blue)
+                    .bold()
+                    .transition(.opacity)
+//                    .onAppear {
+//                        self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+//                            withAnimation(.easeInOut(duration: 0.5)) {
+//                                self.isMatched = false
+//                            }
+//                        }
+//                    }
+//                    .onDisappear {
+//                        self.isMatched = true
+//                    }
             }
-        }.cardify(isFaceUp: isFlipped, isSelect: card.isSelected, isMatch: card.isMatched)
-            .onAppear {
-                withAnimation(.easeOut(duration: 0.5)) {
-                    self.isFlipped = true
+            else if (card.isMatched == false && isMatched) {
+                Text("Oops!")
+                    .font(.headline).foregroundColor(.red)
+                    .bold()
+                    .transition(.opacity)
+//                    .onAppear {
+//                        self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
+//                            withAnimation(.easeInOut(duration: 0.5)) {
+//                                self.isMatched = false
+//                            }
+//                        }
+//                    }
             }
         }
     }

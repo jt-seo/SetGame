@@ -10,7 +10,6 @@ import Foundation
 
 struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symbol: Equatable, Number: Equatable, Shading: Equatable {
     private(set) var deck: [Card]
-    private(set) var matchedCards = [Card]()
     private(set) var dealtCards = [Card]()
     
     init (deckFactory: () -> [Card]) {
@@ -44,19 +43,26 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
     
     var threeCardSelected = false
     var numOfSelectedCards = 0
+    var numOfCardMatched = 0
     
     private mutating func checkCardMatched(selected: Int) {
         if !threeCardSelected {  // Check if selected cards conform to a set.
             let selectedCards = dealtCards.filter { $0.isSelected }
             if selectedCards.count == 3 {
                 let isMatched = isSetMatching(selectedCards[0], selectedCards[1], selectedCards[2])
-                print("Card \(isMatched ? "Matched!" : "Nonmatch!")")
                 for card in selectedCards {
                     if let index = dealtCards.firstIndex(of: card) {
                         dealtCards[index].isMatched = isMatched
                     }
                 }
                 threeCardSelected = true
+                if (isMatched) {
+                    numOfCardMatched += 1
+                    print("Card matched! totalMatch: \(numOfCardMatched)")
+                }
+                else {
+                    print("Card not matched! totalMatch: \(numOfCardMatched)")
+                }
             }
         }
         else {
@@ -88,6 +94,15 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
         }
     }
     
+    private mutating func deselectAllCards() {
+        removeMatchingCards()
+        for card in dealtCards {
+            if card.isSelected {
+                selectCard(card: card)
+            }
+        }
+    }
+    
     private func isSetMatching<T> (_ attr1: T, _ attr2: T, _ attr3: T) -> Bool where T: Equatable {
         if (attr1 == attr2 && attr2 == attr3)
             || (attr1 != attr2 && attr2 != attr3 && attr1 != attr3) {
@@ -113,5 +128,31 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
                 dealtCards[index].isSelected.toggle()
             }
         }
+    }
+    
+    mutating func markMatchingCards(_ idx1: Int, _ idx2: Int, _ idx3: Int) {
+        selectCard(card: dealtCards[idx1])
+        selectCard(card: dealtCards[idx2])
+        selectCard(card: dealtCards[idx3])
+    }
+    
+    mutating func selectMatchingCard() {
+        deselectAllCards()
+        let count = dealtCards.count
+        for (idx1, card) in dealtCards.enumerated() {
+            if idx1 + 2 >= count {
+                print("No matching cards! count: \(count)")
+                return
+            }
+            for idx2 in idx1 + 1..<count-1 {
+                for idx3 in idx1 + 2..<count {
+                    if isSetMatching(card, dealtCards[idx2], dealtCards[idx3]) {
+                        markMatchingCards(idx1, idx2, idx3)
+                        return
+                    }
+                }
+            }
+        }
+        print("No matching cards! count: \(count)")
     }
 }

@@ -36,7 +36,7 @@ struct Cardify: ViewModifier {
                 }
             }
             else {
-                RoundedRectangle(cornerRadius: 10.0).fill()
+                RoundedRectangle(cornerRadius: 10.0).fill(Color.gray)
             }
         }
         .rotation3DEffect(Angle(degrees: isFaceUp ? 180 : 0), axis: (x: 0, y: 1, z: 0))
