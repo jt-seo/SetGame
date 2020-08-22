@@ -15,31 +15,45 @@ struct Cardify: ViewModifier {
     
     func body(content: Content) -> some View {
         ZStack {
-            if (isFaceUp) {
-                Group {
-                    RoundedRectangle(cornerRadius: 10.0).fill(Color.white)
+            ZStack {
+                if (isFaceUp) {
                     Group {
-                        if (isMatch == true) {
-                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 5).foregroundColor(.green)
+                        RoundedRectangle(cornerRadius: 10.0).fill(Color.white)
+                        Group {
+                            if (isMatch == true) {
+                                RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 5).foregroundColor(.green)
+                            }
+                            else if (isMatch == false) {
+                                RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 5).foregroundColor(.red)
+                            }
+                            else if (isSelect) {
+                                RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 3).foregroundColor(.blue)
+                            }
+                            else {
+                                RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 1)
+                            }
                         }
-                        else if (isMatch == false) {
-                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 5).foregroundColor(.red)
-                        }
-                        else if (isSelect) {
-                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 3).foregroundColor(.blue)
-                        }
-                        else {
-                            RoundedRectangle(cornerRadius: 10.0).stroke(lineWidth: 1)
-                        }
-                    }.transition(AnyTransition.opacity.animation(Animation.easeOut(duration: 0.5)))
-                    content
+                            .shadow(radius: 3)
+                            .transition(AnyTransition.opacity.animation(Animation.easeOut(duration: 0.5)))
+                        content
+                    }
+                }
+                else {
+                    RoundedRectangle(cornerRadius: 10.0).fill(Color.gray)
                 }
             }
-            else {
-                RoundedRectangle(cornerRadius: 10.0).fill(Color.gray)
-            }
+            .foregroundColor(.gray)
+            .rotation3DEffect(Angle(degrees: isFaceUp ? 180 : 0), axis: (x: 0, y: 1, z: 0))
+            
+            Group {
+                if (isMatch == true) {
+                    Text("Nice!").bold()
+                }
+                else if (isMatch == false) {
+                    Text("Oops!").bold()
+                }
+            }.font(Font.headline).foregroundColor(Color.black).opacity(0.5)
         }
-        .rotation3DEffect(Angle(degrees: isFaceUp ? 180 : 0), axis: (x: 0, y: 1, z: 0))
     }
 }
 

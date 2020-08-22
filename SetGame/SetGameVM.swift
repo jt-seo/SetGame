@@ -102,4 +102,8 @@ class SetGameVM: ObservableObject {
     func selectMatchingCard() {
         setGame.selectMatchingCard()
     }
+    
+    var numOfCardsMatched: Int {
+        setGame.numOfCardMatched
+    }
 }

@@ -10,35 +10,43 @@ import SwiftUI
 
 struct ContentView: View {
     @ObservedObject var setGame: SetGameVM
+    @State var cardDisplayDelay: Double = 1
     var body: some View {
         VStack {
-            Text("Card in deck: \(setGame.numOfCardsInDeck)").padding()
+            Text("Card in deck: \(setGame.numOfCardsInDeck), Matched: \(setGame.numOfCardsMatched)").padding()
             ZStack {
                 Grid(setGame.dealtCards) { card in
                     CardView(card: card)
+                        .animation(Animation.easeOut(duration: 0.4).delay(0.1 * self.cardDisplayDelay))
                         .onTapGesture {
+                            self.cardDisplayDelay = 0
                             withAnimation(.linear(duration: 0.5)) {
                                 self.setGame.selectCard(card: card)
                             }
-                    }
-                    .foregroundColor(.gray).shadow(radius: 3)
+                        }
                         .transition(.offset(x: CGFloat.random(in: -500...500), y: CGFloat.random(in: -500...500)))
                         .padding(5)
+                        .onAppear {
+                            self.cardDisplayDelay += 1
+                        }
                 }
             }
             HStack {
                 Button("Deal more") {
                     withAnimation(.easeOut(duration: 0.5)) {
+                        self.cardDisplayDelay = 0
                         self.setGame.dealMoreCards()
                     }
                 }.padding()
                 Button("Help..") {
                     withAnimation(.easeOut(duration: 0.5)) {
+                        self.cardDisplayDelay = 0
                         self.setGame.selectMatchingCard()
                     }
                 }.padding()
                 Button("New Game") {
                     withAnimation(.easeOut(duration: 0.5)) {
+                        self.cardDisplayDelay = 0
                         self.setGame.resetGame()
                     }
                 }.padding()
@@ -79,36 +87,6 @@ struct CardView: View {
                         self.isFlipped = true
                     }
                 }
-            
-            if (card.isMatched == true && isMatched) {
-                Text("Nice!")
-                    .font(.headline).foregroundColor(.blue)
-                    .bold()
-                    .transition(.opacity)
-//                    .onAppear {
-//                        self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-//                            withAnimation(.easeInOut(duration: 0.5)) {
-//                                self.isMatched = false
-//                            }
-//                        }
-//                    }
-//                    .onDisappear {
-//                        self.isMatched = true
-//                    }
-            }
-            else if (card.isMatched == false && isMatched) {
-                Text("Oops!")
-                    .font(.headline).foregroundColor(.red)
-                    .bold()
-                    .transition(.opacity)
-//                    .onAppear {
-//                        self.timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { _ in
-//                            withAnimation(.easeInOut(duration: 0.5)) {
-//                                self.isMatched = false
-//                            }
-//                        }
-//                    }
-            }
         }
     }
     

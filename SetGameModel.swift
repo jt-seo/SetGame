@@ -41,9 +41,13 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
         checkCardMatched(selected: Int.max)
     }
     
-    var threeCardSelected = false
-    var numOfSelectedCards = 0
-    var numOfCardMatched = 0
+    private var threeCardSelected = false
+    private var numOfSelectedCards = 0
+    private(set) var numOfCardMatched = 0
+    
+    private var isMatchingSetExist: Bool {
+        dealtCards.filter { $0.isMatched == true }.count > 0
+    }
     
     private mutating func checkCardMatched(selected: Int) {
         if !threeCardSelected {  // Check if selected cards conform to a set.
@@ -66,8 +70,7 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
             }
         }
         else {
-            let numOfMatchingCards = dealtCards.filter { $0.isMatched == true }.count
-            if (numOfMatchingCards > 0) {
+            if isMatchingSetExist {
                 removeMatchingCards()
             }
             else {
@@ -95,7 +98,6 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
     }
     
     private mutating func deselectAllCards() {
-        removeMatchingCards()
         for card in dealtCards {
             if card.isSelected {
                 selectCard(card: card)
@@ -137,6 +139,11 @@ struct SetGameModel<Color, Symbol, Number, Shading> where Color: Equatable, Symb
     }
     
     mutating func selectMatchingCard() {
+        if isMatchingSetExist {
+            removeMatchingCards()
+            return
+        }
+
         deselectAllCards()
         let count = dealtCards.count
         for (idx1, card) in dealtCards.enumerated() {
